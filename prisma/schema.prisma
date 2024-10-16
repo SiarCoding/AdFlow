@@ -8,50 +8,60 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model user {
-  id                Int      @id @default(autoincrement())
-  created_time      DateTime @default(now())
-  email             String   @unique
-  first_name        String?
-  last_name         String?
+model User {
+  id                Int       @id @default(autoincrement())
+  createdAt         DateTime  @default(now())
+  email             String    @unique
+  firstName         String?
+  lastName          String?
   gender            String?
-  profile_image_url String?
-  user_id           String   @unique
+  profileImageUrl   String?
+  userId            String    @unique
   subscription      String?
+  company           String?
+  role              String?
+  campaigns         Campaign[]
+  socialAccounts    SocialAccount[]
+  contentCalendars  ContentCalendar[]
+  competitors       Competitor[]
+  analyticsReports  AnalyticsReport[]
+  influencers       Influencer[]
+  automationRules   AutomationRule[]
+  responseTemplates ResponseTemplate[]
 }
 
-model payments {
+model Payment {
   id               Int      @id @default(autoincrement())
-  created_time     DateTime @default(now())
-  stripe_id        String
+  createdAt        DateTime @default(now())
+  stripeId         String
   email            String
   amount           String
-  payment_time     String
-  payment_date     String
+  paymentTime      String
+  paymentDate      String
   currency         String
-  user_id          String
-  customer_details String
-  payment_intent   String
+  userId           String
+  customerDetails  String
+  paymentIntent    String
 }
 
-model subscriptions {
+model Subscription {
   id                        Int      @id @default(autoincrement())
-  created_time              DateTime @default(now())
-  subscription_id           String
-  stripe_user_id            String
+  createdAt                 DateTime @default(now())
+  subscriptionId            String
+  stripeUserId              String
   status                    String
-  start_date                String
-  end_date                  String?
-  plan_id                   String
-  default_payment_method_id String?
+  startDate                 String
+  endDate                   String?
+  planId                    String
+  defaultPaymentMethodId    String?
   email                     String
-  user_id                   String
+  userId                    String
 }
 
-model subscriptions_plans {
+model SubscriptionPlan {
   id           Int      @id @default(autoincrement())
-  created_time DateTime @default(now())
-  plan_id      String
+  createdAt    DateTime @default(now())
+  planId       String
   name         String
   description  String
   amount       String
@@ -59,15 +69,134 @@ model subscriptions_plans {
   interval     String
 }
 
-model invoices {
+model Invoice {
   id              Int      @id @default(autoincrement())
-  created_time    DateTime @default(now())
-  invoice_id      String
-  subscription_id String
-  amount_paid     String
-  amount_due      String?
+  createdAt       DateTime @default(now())
+  invoiceId       String
+  subscriptionId  String
+  amountPaid      String
+  amountDue       String?
   currency        String
   status          String
   email           String
-  user_id         String?
+  userId          String?
+}
+
+model Campaign {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  name            String
+  startDate       DateTime
+  endDate         DateTime?
+  status          String
+  budget          Float?
+  targetAudience  String?
+  platforms       String[]
+  userId          String
+  user            User      @relation(fields: [userId], references: [userId])
+  contents        Content[]
+}
+
+model Content {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  type            String    // e.g., "post", "ad", "video"
+  text            String?
+  imageUrl        String?
+  videoUrl        String?
+  scheduledTime   DateTime?
+  status          String    // e.g., "draft", "scheduled", "published"
+  performance     Json?     // Store performance metrics as JSON
+  campaignId      Int
+  campaign        Campaign  @relation(fields: [campaignId], references: [id])
+  calendarEvents  CalendarEvent[]
+}
+
+model SocialAccount {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  platform        String    // e.g., "facebook", "instagram", "linkedin"
+  accountId       String
+  accessToken     String
+  refreshToken    String?
+  userId          String
+  user            User      @relation(fields: [userId], references: [userId])
+}
+
+model ContentCalendar {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  name            String
+  userId          String
+  user            User      @relation(fields: [userId], references: [userId])
+  events          CalendarEvent[]
+}
+
+model CalendarEvent {
+  id                Int       @id @default(autoincrement())
+  createdAt         DateTime  @default(now())
+  title             String
+  description       String?
+  startTime         DateTime
+  endTime           DateTime?
+  contentId         Int?
+  content           Content?  @relation(fields: [contentId], references: [id])
+  contentCalendarId Int
+  contentCalendar   ContentCalendar @relation(fields: [contentCalendarId], references: [id])
+}
+
+model Competitor {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  name            String
+  website         String?
+  socialAccounts  Json      // Store social account links as JSON
+  userId          String
+  user            User      @relation(fields: [userId], references: [userId])
+}
+
+model AnalyticsReport {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  reportType      String    // e.g., "weekly", "monthly", "campaign"
+  startDate       DateTime
+  endDate         DateTime
+  metrics         Json      // Store analytics metrics as JSON
+  userId          String
+  user            User      @relation(fields: [userId], references: [userId])
+}
+
+model Influencer {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  name            String
+  platform        String
+  followers       Int
+  engagementRate  Float
+  contactInfo     String?
+  userId          String
+  user            User      @relation(fields: [userId], references: [userId])
+}
+
+model AutomationRule {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  name            String
+  triggerType     String    // e.g., "schedule", "event", "metric"
+  triggerValue    String
+  actionType      String    // e.g., "post", "notify", "adjust_budget"
+  actionValue     String
+  isActive        Boolean   @default(true)
+  userId          String
+  user            User      @relation(fields: [userId], references: [userId])
+}
+
+model ResponseTemplate {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  name            String
+  content         String
+  category        String    // e.g., "positive", "negative", "question"
+  userId          String
+  user            User      @relation(fields: [userId], references: [userId])
 }

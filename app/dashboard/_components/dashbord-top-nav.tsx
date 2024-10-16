@@ -1,74 +1,53 @@
 "use client"
 
+import { Bell, HelpCircle, Menu, MessageSquare, Rocket } from "lucide-react"
+import Link from "next/link"
 import ModeToggle from '@/components/mode-toggle'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogClose } from '@/components/ui/dialog'
-import { Separator } from '@/components/ui/separator'
-import { SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { UserProfile } from '@/components/user-profile'
-import config from '@/config'
-import { HamburgerMenuIcon } from '@radix-ui/react-icons'
-import { Banknote, Folder, HomeIcon, Settings } from 'lucide-react'
-import Link from 'next/link'
+
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { UserProfile } from "@/components/user-profile"
+import config from "@/config"
 import { ReactNode } from 'react'
 
-export default function DashboardTopNav({ children }: { children: ReactNode }) {
+export default function Navbar({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-col">
       <header className="flex h-14 lg:h-[55px] items-center gap-4 border-b px-3">
-        <Dialog>
-          <SheetTrigger className="min-[1024px]:hidden p-2 transition">
-            <HamburgerMenuIcon />
-            <Link href="/dashboard">
-              <span className="sr-only">Home</span>
-            </Link>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="lg:hidden">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Toggle navigation menu</span>
+            </Button>
           </SheetTrigger>
           <SheetContent side="left">
-            <SheetHeader>
-              <Link href="/">
-                <SheetTitle>Nextjs Starter Kit</SheetTitle>
-              </Link>
-            </SheetHeader>
-            <div className="flex flex-col space-y-3 mt-[1rem]">
-              <DialogClose asChild>
-                <Link href="/dashboard">
-                  <Button variant="outline" className="w-full">
-                    <HomeIcon className="mr-2 h-4 w-4" />
-                    Home
-                  </Button>
-                </Link>
-              </DialogClose>
-              <DialogClose asChild>
-                <Link href="/dashboard/projects">
-                  <Button variant="outline" className="w-full">
-                    <Folder className="mr-2 h-4 w-4" />
-                    Projects
-                  </Button>
-                </Link>
-              </DialogClose>
-              <DialogClose asChild>
-                <Link href="/dashboard/finance">
-                  <Button variant="outline" className="w-full">
-                    <Banknote className="mr-2 h-4 w-4" />
-                    Finance
-                  </Button>
-                </Link>
-              </DialogClose>
-              <Separator className="my-3" />
-              <DialogClose asChild>
-                <Link href="/dashboard/settings">
-                  <Button variant="outline" className="w-full">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Button>
-                </Link>
-              </DialogClose>
-            </div>
+            {/* Sidebar content goes here */}
           </SheetContent>
-        </Dialog>
-        <div className="flex justify-center items-center gap-2 ml-auto">
-          {config?.auth?.enabled && <UserProfile />}
-          <ModeToggle />
+        </Sheet>
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 py-2 px-4 text-white bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 dark:text-white group">
+            <Rocket className="w-4 h-4 mr-2" />
+            Upgrade Pro
+          </button>
+          <nav className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon">
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Notifications</span>
+            </Button>
+            <Button variant="ghost" size="icon">
+              <MessageSquare className="h-5 w-5" />
+              <span className="sr-only">Messages</span>
+            </Button>
+            <Button variant="ghost" size="icon">
+              <HelpCircle className="h-5 w-5" />
+              <span className="sr-only">Help</span>
+            </Button>
+          </nav>
+          <div className="flex justify-center items-center gap-2 ml-auto">
+            {config?.auth?.enabled && <UserProfile />}
+            <ModeToggle />
+          </div>
         </div>
       </header>
       {children}
