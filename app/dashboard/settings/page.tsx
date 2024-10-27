@@ -1,39 +1,40 @@
-"use client"
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import config from '@/config';
-import { useUser } from '@clerk/nextjs'
+"use client";
 
-export default function Settings() {
-  let user = null;
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { ProfileSettings } from "@/components/settings/profile-settings";
+import { NotificationSettings } from "@/components/settings/notification-settings";
+import { AccountSettings } from "@/components/settings/account-settings";
 
-  if (config?.auth?.enabled) {
-      user = useUser();
-  }
-
+export default function SettingsPage() {
   return (
-    <div className='flex justify-start items-center flex-wrap px-4 pt-5 gap-4'>
-      <div className="flex flex-col gap-3 mb-[5rem] w-full max-w-[700px]">
-        <h2 className="mt-10 scroll-m-20 border-b pb-2 w-full text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-          Mein Profil
-        </h2>
-        <div className='flex w-full gap-3 mt-3'>
-          <div className='flex flex-col gap-3 w-full'>
-            <Label>Vorname</Label>
-            <Input disabled defaultValue={user?.user?.firstName ? user?.user?.firstName : ""} />
-          </div>
-          <div className='flex flex-col gap-3 w-full'>
-            <Label>Nachname</Label>
-            <Input disabled defaultValue={user?.user?.lastName ? user?.user?.lastName : ""} />
-          </div>
-        </div>
-        <div className='flex flex-col gap-3'>
-          <div className='flex flex-col gap-3'>
-            <Label>E-Mail Adresse</Label>
-            <Input disabled defaultValue={user?.user?.emailAddresses?.[0]?.emailAddress!} />
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold">Einstellungen</h1>
+
+      <Tabs defaultValue="profile" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="profile">Profil</TabsTrigger>
+          <TabsTrigger value="notifications">Benachrichtigungen</TabsTrigger>
+          <TabsTrigger value="account">Account</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile">
+          <ProfileSettings />
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <NotificationSettings />
+        </TabsContent>
+
+        <TabsContent value="account">
+          <AccountSettings />
+        </TabsContent>
+      </Tabs>
     </div>
-  )
+  );
 }

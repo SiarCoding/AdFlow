@@ -9,17 +9,19 @@ datasource db {
 }
 
 model User {
-  id                Int       @id @default(autoincrement())
-  createdAt         DateTime  @default(now())
-  email             String    @unique
+  id                Int                @id @default(autoincrement())
+  createdAt         DateTime           @default(now())
+  email             String             @unique
   firstName         String?
   lastName          String?
   gender            String?
   profileImageUrl   String?
-  userId            String    @unique
+  userId            String             @unique
   subscription      String?
   company           String?
   role              String?
+  credits           Int                @default(5)
+
   campaigns         Campaign[]
   socialAccounts    SocialAccount[]
   contentCalendars  ContentCalendar[]
@@ -28,175 +30,252 @@ model User {
   influencers       Influencer[]
   automationRules   AutomationRule[]
   responseTemplates ResponseTemplate[]
+  payments          Payment[]
+  subscriptions     Subscription[]
+  invoices          Invoice[]
 }
 
 model Payment {
   id               Int      @id @default(autoincrement())
   createdAt        DateTime @default(now())
-  stripeId         String
-  email            String
-  amount           String
-  paymentTime      String
-  paymentDate      String
-  currency         String
-  userId           String
-  customerDetails  String
-  paymentIntent    String
+  stripeId         String   
+  email            String   
+  amount           Float    
+  paymentTime      DateTime 
+  paymentDate      DateTime 
+  currency         String   
+  userId           String   
+  customerDetails  String   
+  paymentIntent    String   
+
+  user             User     @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
 }
 
 model Subscription {
-  id                        Int      @id @default(autoincrement())
-  createdAt                 DateTime @default(now())
-  subscriptionId            String
-  stripeUserId              String
-  status                    String
-  startDate                 String
-  endDate                   String?
-  planId                    String
-  defaultPaymentMethodId    String?
-  email                     String
-  userId                    String
+  id                        Int               @id @default(autoincrement())
+  createdAt                 DateTime          @default(now())
+  subscriptionId            String            @unique
+  stripeUserId             String            
+  status                    String            
+  startDate                 DateTime          
+  endDate                   DateTime?         
+  planId                    String            
+  defaultPaymentMethodId    String?           
+  email                     String            
+  userId                    String            
+
+  user                      User              @relation(fields: [userId], references: [userId])
+  subscriptionPlan          SubscriptionPlan  @relation(fields: [planId], references: [planId])
+  invoices                  Invoice[]         
+
+  @@index([userId])
+  @@index([planId])
 }
 
 model SubscriptionPlan {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  planId       String
-  name         String
-  description  String
-  amount       String
-  currency     String
-  interval     String
+  id           Int           @id @default(autoincrement())
+  createdAt    DateTime      @default(now())
+  planId       String        @unique
+  name         String        
+  description  String        
+  amount       Float         
+  currency     String        
+  interval     String        
+
+  subscriptions Subscription[]
 }
 
 model Invoice {
-  id              Int      @id @default(autoincrement())
-  createdAt       DateTime @default(now())
-  invoiceId       String
-  subscriptionId  String
-  amountPaid      String
-  amountDue       String?
-  currency        String
-  status          String
-  email           String
-  userId          String?
+  id              Int          @id @default(autoincrement())
+  createdAt       DateTime     @default(now())
+  invoiceId       String       @unique
+  subscriptionId  String       
+  amountPaid      Float        
+  amountDue       Float?       
+  currency        String       
+  status          String       
+  email           String       
+  userId          String?      
+
+  subscription    Subscription @relation(fields: [subscriptionId], references: [subscriptionId])
+  user            User?        @relation(fields: [userId], references: [userId])
+
+  @@index([subscriptionId])
+  @@index([userId])
 }
 
 model Campaign {
   id              Int       @id @default(autoincrement())
   createdAt       DateTime  @default(now())
-  name            String
-  startDate       DateTime
-  endDate         DateTime?
-  status          String
-  budget          Float?
-  targetAudience  String?
-  platforms       String[]
-  userId          String
+  name            String    
+  startDate       DateTime  
+  endDate         DateTime? 
+  status          String    
+  budget          Float?    
+  targetAudience  String?   
+  platforms       String[]  
+  userId          String    
+
   user            User      @relation(fields: [userId], references: [userId])
   contents        Content[]
+
+  @@index([userId])
 }
 
 model Content {
   id              Int       @id @default(autoincrement())
   createdAt       DateTime  @default(now())
-  type            String    // e.g., "post", "ad", "video"
-  text            String?
-  imageUrl        String?
-  videoUrl        String?
-  scheduledTime   DateTime?
-  status          String    // e.g., "draft", "scheduled", "published"
-  performance     Json?     // Store performance metrics as JSON
-  campaignId      Int
+  type            String    
+  text            String?   
+  imageUrl        String?   
+  videoUrl        String?   
+  scheduledTime   DateTime? 
+  status          String    
+  performance     Json?     
+  campaignId      Int       
+
   campaign        Campaign  @relation(fields: [campaignId], references: [id])
   calendarEvents  CalendarEvent[]
+
+  @@index([campaignId])
 }
 
 model SocialAccount {
   id              Int       @id @default(autoincrement())
   createdAt       DateTime  @default(now())
-  platform        String    // e.g., "facebook", "instagram", "linkedin"
-  accountId       String
-  accessToken     String
-  refreshToken    String?
-  userId          String
+  platform        String    
+  accountId       String    
+  accessToken     String    
+  refreshToken    String?   
+  userId          String    
+
   user            User      @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
 }
 
 model ContentCalendar {
-  id              Int       @id @default(autoincrement())
-  createdAt       DateTime  @default(now())
-  name            String
-  userId          String
-  user            User      @relation(fields: [userId], references: [userId])
+  id              Int             @id @default(autoincrement())
+  createdAt       DateTime        @default(now())
+  name            String          
+  userId          String          
+
+  user            User            @relation(fields: [userId], references: [userId])
   events          CalendarEvent[]
+
+  @@index([userId])
 }
 
 model CalendarEvent {
-  id                Int       @id @default(autoincrement())
-  createdAt         DateTime  @default(now())
-  title             String
-  description       String?
-  startTime         DateTime
-  endTime           DateTime?
-  contentId         Int?
-  content           Content?  @relation(fields: [contentId], references: [id])
-  contentCalendarId Int
-  contentCalendar   ContentCalendar @relation(fields: [contentCalendarId], references: [id])
+  id                Int               @id @default(autoincrement())
+  createdAt         DateTime          @default(now())
+  title             String            
+  description       String?           
+  startTime         DateTime          
+  endTime           DateTime?         
+  contentId         Int?              
+  contentCalendarId Int               
+
+  content           Content?          @relation(fields: [contentId], references: [id])
+  contentCalendar   ContentCalendar   @relation(fields: [contentCalendarId], references: [id])
+
+  @@index([contentId])
+  @@index([contentCalendarId])
 }
 
 model Competitor {
   id              Int       @id @default(autoincrement())
   createdAt       DateTime  @default(now())
-  name            String
-  website         String?
-  socialAccounts  Json      // Store social account links as JSON
-  userId          String
+  name            String    
+  website         String?   
+  socialAccounts  Json      
+  userId          String    
+
   user            User      @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
 }
 
 model AnalyticsReport {
   id              Int       @id @default(autoincrement())
   createdAt       DateTime  @default(now())
-  reportType      String    // e.g., "weekly", "monthly", "campaign"
-  startDate       DateTime
-  endDate         DateTime
-  metrics         Json      // Store analytics metrics as JSON
-  userId          String
+  reportType      String    
+  startDate       DateTime  
+  endDate         DateTime  
+  metrics         Json      
+  userId          String    
+
   user            User      @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
 }
 
 model Influencer {
   id              Int       @id @default(autoincrement())
   createdAt       DateTime  @default(now())
-  name            String
-  platform        String
-  followers       Int
-  engagementRate  Float
-  contactInfo     String?
-  userId          String
+  name            String    
+  platform        String    
+  followers       Int       
+  engagementRate  Float     
+  contactInfo     String?   
+  userId          String    
+
   user            User      @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
 }
 
 model AutomationRule {
   id              Int       @id @default(autoincrement())
   createdAt       DateTime  @default(now())
-  name            String
-  triggerType     String    // e.g., "schedule", "event", "metric"
-  triggerValue    String
-  actionType      String    // e.g., "post", "notify", "adjust_budget"
-  actionValue     String
+  name            String    
+  triggerType     String    
+  triggerValue    String    
+  actionType      String    
+  actionValue     String    
   isActive        Boolean   @default(true)
-  userId          String
+  userId          String    
+
   user            User      @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
 }
 
 model ResponseTemplate {
   id              Int       @id @default(autoincrement())
   createdAt       DateTime  @default(now())
-  name            String
-  content         String
-  category        String    // e.g., "positive", "negative", "question"
-  userId          String
+  name            String    
+  content         String    
+  category        String    
+  userId          String    
+
   user            User      @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
+}
+
+model CampaignOptimization {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  campaignId      Int
+  recommendations Json
+  status          String
+  userId          String
+
+  @@index([campaignId])
+  @@index([userId])
+}
+
+model AnalyticsConnection {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  provider        String
+  accountId       String
+  accessToken     String
+  refreshToken    String?
+  userId          String
+
+  @@index([userId])
 }

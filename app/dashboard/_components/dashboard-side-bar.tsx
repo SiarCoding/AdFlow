@@ -9,7 +9,12 @@ import {
   Sparkles,
   BarChart2,
   Zap,
-  Users
+  Users,
+  Calendar,
+  Megaphone,
+  FileText,
+  MessageSquare,
+  Target
 } from "lucide-react"
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -19,10 +24,13 @@ export default function DashboardSideBar() {
 
   const menuItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/dashboard/kampagnen", icon: Sparkles, label: "Kampagnen" },
-    { href: "/dashboard/strategie", icon: BarChart2, label: "Strategie" },
-    { href: "/dashboard/automatisierung", icon: Zap, label: "Automatisierung" },
+    { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics" },
+    { href: "/dashboard/calendar", icon: Calendar, label: "Calendar" },
+    { href: "/dashboard/campaigns", icon: Megaphone, label: "Campaigns" },
     { href: "/dashboard/community", icon: Users, label: "Community" },
+    { href: "/dashboard/content", icon: FileText, label: "Content" },
+    { href: "/dashboard/messages", icon: MessageSquare, label: "Messages" },
+    { href: "/dashboard/strategy", icon: Target, label: "Strategy" }
   ];
 
   return (

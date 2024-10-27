@@ -1,17 +1,22 @@
 import { NextResponse } from "next/server";
 import config from "./config";
 
-let clerkMiddleware: (arg0: (auth: any, req: any) => any) => { (arg0: any): any; new(): any; }, createRouteMatcher;
+let clerkMiddleware: (arg0: (auth: any, req: any) => any) => any, createRouteMatcher;
 
 if (config.auth.enabled) {
   try {
+    const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+    const secretKey = process.env.CLERK_SECRET_KEY;
+    
+    if (!publishableKey || !secretKey) {
+      throw new Error(`Missing Clerk keys: ${!publishableKey ? 'publishableKey' : ''} ${!secretKey ? 'secretKey' : ''}`);
+    }
     ({ clerkMiddleware, createRouteMatcher } = require("@clerk/nextjs/server"));
-  } catch (error) {
-    console.warn("Clerk modules not available. Auth will be disabled.");
+  } catch (error: any) {
+    console.warn("Clerk authentication disabled:", error.message);
     config.auth.enabled = false;
   }
 }
-
 const isProtectedRoute = config.auth.enabled
   ? createRouteMatcher(["/dashboard(.*)"])
   : () => false;
